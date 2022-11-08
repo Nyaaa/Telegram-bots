@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "telegram-bots"
+version = "0.1.0"
+description = ""
+authors = ["Nyaaa <1457047+Nyaaa@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "telegram_bots"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^0.21.0"
+pytelegrambotapi = "^4.7.1"
+requests = "^2.28.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
