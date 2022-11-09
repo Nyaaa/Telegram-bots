@@ -1,37 +1,54 @@
 import requests
 import json
-import os
 import telebot
-from dotenv import load_dotenv, find_dotenv
-from dataclasses import dataclass
-
-load_dotenv(find_dotenv())
+from extensions import *
+# TODO add async
 
 
-@dataclass(frozen=True)
-class API:
-    bot_name: str = os.getenv('CURRENCY_BOT')
-    bot_token: str = os.getenv('CURRENCY_API_TOKEN')
-
-
-bot = telebot.TeleBot(API.bot_token)
+bot = telebot.TeleBot(TOKEN)
+cmd_help = telebot.types.BotCommand("help", "Bot usage")
+cmd_start = telebot.types.BotCommand("start", "Bot info")
+cmd_values = telebot.types.BotCommand("values", "Supported currencies")
+bot.set_my_commands(commands=[cmd_start, cmd_help, cmd_values])
 
 
 @bot.message_handler(commands=['start'])
 def message_start(message):
-    bot.reply_to(message, "start message")
+    bot.send_message(message.chat.id, "Welcome to currency converter bot!\n"
+                                      "Usage: /help\n"
+                                      "Supported currencies: /values")
 
 
 @bot.message_handler(commands=['help'])
 def message_help(message):
-    bot.reply_to(message, "help message")
+    bot.send_message(message.chat.id, "Usage:\n"
+                                      "[currency to convert from] [currency to convert to] [amount]\n"
+                                      "Example: usd eur 100\n"
+                                      "Supported currencies: /values")
 
 
-@bot.message_handler(func=lambda message: True)
+@bot.message_handler(commands=['values'])  # TODO move this
+def message_help(message):
+    url = 'https://api.exchangerate.host/symbols'
+    response = requests.get(url)
+    data = json.loads(response.content)
+    text = ""
+    for i in data['symbols'].values():
+        description = i["description"]
+        code = i["code"]
+        text += "".join(f'{code}: {description}\n')
+    bot.send_message(message.chat.id, text)
+
+
+@bot.message_handler(content_types=['text'])
 def message_convert(message):
-    base, to, amount = message.text.split()
-    url = f'https://api.exchangerate.host/convert?from={base}&to={to}&amount={amount}'
-    bot.reply_to(message, f'{base}, {to}, {amount}')
+    values = message.text.split()
+    try:
+        text = Converter.convert(values)
+    except APIException as e:
+        bot.send_message(message.chat.id, f'{e}')
+    else:
+        bot.send_message(message.chat.id, text)
 
 
 bot.infinity_polling()
