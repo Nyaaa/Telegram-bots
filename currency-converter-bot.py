@@ -1,6 +1,5 @@
 import telebot
 from extensions import *
-# TODO add async
 
 
 bot = telebot.TeleBot(API.TOKEN)
