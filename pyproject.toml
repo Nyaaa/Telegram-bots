@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "telegram-bots"
-version = "0.1.0"
-description = ""
+name = "currency-converter-bot"
+version = "1.0.0"
+description = "Telegram bot for converting currencies "
 authors = ["Nyaaa <1457047+Nyaaa@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{include = "telegram_bots"}]
+packages = [{include = "currency-converter-bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
