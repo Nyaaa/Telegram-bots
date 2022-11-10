@@ -1,11 +1,9 @@
-import requests
-import json
 import telebot
 from extensions import *
 # TODO add async
 
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(API.TOKEN)
 cmd_help = telebot.types.BotCommand("help", "Bot usage")
 cmd_start = telebot.types.BotCommand("start", "Bot info")
 cmd_values = telebot.types.BotCommand("values", "Supported currencies")
@@ -27,28 +25,20 @@ def message_help(message):
                                       "Supported currencies: /values")
 
 
-@bot.message_handler(commands=['values'])  # TODO move this
+@bot.message_handler(commands=['values'])
 def message_help(message):
-    url = 'https://api.exchangerate.host/symbols'
-    response = requests.get(url)
-    data = json.loads(response.content)
-    text = ""
-    for i in data['symbols'].values():
-        description = i["description"]
-        code = i["code"]
-        text += "".join(f'{code}: {description}\n')
-    bot.send_message(message.chat.id, text)
+    try:
+        bot.send_message(message.chat.id, Converter.get_currencies())
+    except APIException as e:
+        bot.send_message(message.chat.id, str(e))
 
 
 @bot.message_handler(content_types=['text'])
 def message_convert(message):
-    values = message.text.split()
     try:
-        text = Converter.convert(values)
+        bot.send_message(message.chat.id, Converter.convert(message.text))
     except APIException as e:
-        bot.send_message(message.chat.id, f'{e}')
-    else:
-        bot.send_message(message.chat.id, text)
+        bot.send_message(message.chat.id, str(e))
 
 
 bot.infinity_polling()
