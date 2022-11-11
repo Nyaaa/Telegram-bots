@@ -1,43 +1,56 @@
+from telebot.async_telebot import AsyncTeleBot
 import telebot
 from extensions import *
+import asyncio
+from textwrap import dedent
+
+bot = AsyncTeleBot(API.TOKEN)
 
 
-bot = telebot.TeleBot(API.TOKEN)
-cmd_help = telebot.types.BotCommand("help", "Bot usage")
-cmd_start = telebot.types.BotCommand("start", "Bot info")
-cmd_values = telebot.types.BotCommand("values", "Supported currencies")
-bot.set_my_commands(commands=[cmd_start, cmd_help, cmd_values])
+async def menu():
+    await bot.set_my_commands(commands=[
+        telebot.types.BotCommand("help", "Bot usage"),
+        telebot.types.BotCommand("start", "Bot info"),
+        telebot.types.BotCommand("values", "Supported currencies")
+    ])
 
 
 @bot.message_handler(commands=['start'])
-def message_start(message):
-    bot.send_message(message.chat.id, "Welcome to currency converter bot!\n"
-                                      "Usage: /help\n"
-                                      "Supported currencies: /values")
+async def message_start(message):
+    text = """
+            Welcome to currency converter bot!
+            Usage: /help
+            Supported currencies: /values
+            """
+    await bot.send_message(message.chat.id, dedent(text))
 
 
 @bot.message_handler(commands=['help'])
-def message_help(message):
-    bot.send_message(message.chat.id, "Usage:\n"
-                                      "[currency to convert from] [currency to convert to] [amount]\n"
-                                      "Example: usd eur 100\n"
-                                      "Supported currencies: /values")
+async def message_help(message):
+    text = """
+            Usage:
+            [currency to convert from] [currency to convert to] [amount]
+            Example:
+            usd eur 100
+            Supported currencies: /values
+            """
+    await bot.send_message(message.chat.id, dedent(text))
 
 
 @bot.message_handler(commands=['values'])
-def message_help(message):
+async def message_help(message):
     try:
-        bot.send_message(message.chat.id, Converter.get_currencies())
+        await bot.send_message(message.chat.id, Converter.get_currencies())
     except APIException as e:
-        bot.send_message(message.chat.id, str(e))
+        await bot.send_message(message.chat.id, str(e))
 
 
 @bot.message_handler(content_types=['text'])
-def message_convert(message):
+async def message_convert(message):
     try:
-        bot.send_message(message.chat.id, Converter.convert(message.text))
+        await bot.send_message(message.chat.id, Converter.convert(message.text))
     except APIException as e:
-        bot.send_message(message.chat.id, str(e))
+        await bot.send_message(message.chat.id, str(e))
 
 
-bot.infinity_polling()
+asyncio.run(bot.polling())
