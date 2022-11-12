@@ -53,4 +53,4 @@ async def message_convert(message):
         await bot.send_message(message.chat.id, str(e))
 
 
-asyncio.run(bot.polling())
+asyncio.run(bot.infinity_polling())

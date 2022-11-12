@@ -54,7 +54,7 @@ class Converter:
         cur = cls.load_currencies()
         for i in base, quote:
             if i not in cur['symbols'].keys():
-                raise ConversionException(f'Error: unknown currency {i}')
+                raise ConversionException(f"Error: unknown currency {i}")
 
         return base, quote, amount
 
@@ -80,19 +80,19 @@ class Converter:
         data = cls.load_currencies(force=True)
         text = ""
         for i in data['symbols'].values():
-            description = i["description"]
-            code = i["code"]
-            text += "".join(f'{code}: {description}\n')
+            description = i['description']
+            code = i['code']
+            text += "".join(f"{code}: {description}\n")
         return text
 
     @classmethod
     def convert(cls, query: str) -> str:
         """Converts currencies"""
         base, quote, amount = cls.check_input(query)
-        url = f'https://api.exchangerate.host/convert?from={base}&to={quote}&amount={amount}&places=2'
+        url = f"https://api.exchangerate.host/convert?from={base}&to={quote}&amount={amount}&places=2"
         response = cls.check_server(url)
         reply = json.loads(response)
-        if reply["info"]["rate"] is None:  # this should never happen
+        if reply['info']['rate'] is None:  # this should never happen
             raise ConversionException("Error: unknown currency")
 
-        return f'{amount} {base} = {reply["result"]} {quote}'
+        return f"{amount} {base} = {reply['result']} {quote}"
